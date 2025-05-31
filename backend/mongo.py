@@ -23,10 +23,10 @@ def main():
 		print(e)
 
 	# getting data from database
-	database = client.sample_guides
-	collection = database.planets
+	# database = client.sample_guides
+	# collection = database.planets
 
-	# find code goes here
+	# retrieve data from database
 	# results = collection.find()  # get all entries
 	# results = collection.find({  # get entries with matching aspect
 	# 	"hasRings": True
@@ -84,15 +84,15 @@ def main():
 
 	
 	# delete data from database
-	doc = {
-		"radius": {
-			"$gt": 2,
-			"$lt": 2
-		}
-	}
-	result = collection.delete_many(doc)  # deletes any entries matching criteria
+	# doc = {
+	# 	"radius": {
+	# 		"$gt": 2,
+	# 		"$lt": 2
+	# 	}
+	# }
+	# result = collection.delete_many(doc)  # deletes any entries matching criteria
 	# deleting always results in an object with the number of entries deleted
-	print("Entries deleted: ", result.deleted_count)
+	# print("Entries deleted: ", result.deleted_count)
 
 	# Close the connection to MongoDB when you're done.
 	client.close()
