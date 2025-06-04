@@ -51,7 +51,7 @@
 
 <div class="navbar">
     <div class="nav-left">
-        🐾 <span>PetSpark</span>
+         <span>PetSpark</span>
     </div>
     <div class="nav-right">
         <span class="icon">🤍</span>

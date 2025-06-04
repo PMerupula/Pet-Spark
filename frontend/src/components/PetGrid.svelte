@@ -1,21 +1,33 @@
-<script>
+<!-- src/components/PetGrid.svelte -->
+<script lang="ts">
+
+    import catsImg from '../assets/Cats.png';
+    import crittersImg from '../assets/Critters.png';
+    import dogsImg from '../assets/Dogs.png';
+
+
+    const placeholders = [catsImg, crittersImg, dogsImg];
+
     const allPets = [
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494949/dog.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494948/cat.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494950/rabbit.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494949/dog.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494948/cat.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494950/rabbit.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494949/dog.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494948/cat.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494950/rabbit.svg" },
-        { name: "Pet Name", icon: "https://www.svgrepo.com/show/494949/dog.svg" }
+        { name: "PetName", icon: "https://www.svgrepo.com/show/494949/dog.svg" },
+        { name: "PetName", icon: "" },
+        { name: "PetName", icon: "https://www.svgrepo.com/show/494948/cat.svg" },
+        { name: "PetName", icon: null },
+        { name: "PetName", icon: "https://www.svgrepo.com/show/494950/rabbit.svg" },
+        { name: "PetName", icon: "" },
+        { name: "PetName", icon: undefined },
+        { name: "PetName", icon: "https://www.svgrepo.com/show/494949/dog.svg" },
+        { name: "PetName", icon: "" },
+        { name: "PetName", icon: "https://www.svgrepo.com/show/494948/cat.svg" }
     ];
 
     const itemsPerPage = 8;
     let currentPage = 0;
 
-    $: visiblePets = allPets.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+    $: visiblePets = allPets.slice(
+        currentPage * itemsPerPage,
+        (currentPage + 1) * itemsPerPage
+    );
 
     function nextPage() {
         if ((currentPage + 1) * itemsPerPage < allPets.length) {
@@ -27,6 +39,12 @@
         if (currentPage > 0) {
             currentPage--;
         }
+    }
+
+
+    function getPlaceholder() {
+        const idx = Math.floor(Math.random() * placeholders.length);
+        return placeholders[idx];
     }
 </script>
 
@@ -62,7 +80,6 @@
         right: -1.5rem;
     }
 
-    /* 网格：两行四列 */
     .grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -88,6 +105,8 @@
         width: 60px;
         height: 60px;
         margin-bottom: 0.5rem;
+        object-fit: cover;
+        border-radius: 50%;
     }
 
     .heart {
@@ -127,7 +146,12 @@
         {#each visiblePets as pet}
             <div class="pet-card">
                 <div class="heart">♡</div>
-                <img class="pet-icon" src={pet.icon} alt="icon" />
+
+                <img
+                        class="pet-icon"
+                        src={pet.icon ? pet.icon : getPlaceholder()}
+                        alt={pet.name}
+                />
                 <p>{pet.name}</p>
             </div>
         {/each}
