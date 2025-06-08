@@ -1,6 +1,21 @@
 <script>
-    export let username = "Petpet";
+
 </script>
+
+<div class="navbar">
+    <div class="nav-left">
+        <a href="/" class="logo-link">PetSpark</a>
+    </div>
+
+    <div class="nav-right">
+        <a href="/preferences" class="heart-btn" aria-label="Preferences">❤️</a>
+        <a href="/login">Log in</a>
+        <a href="/signup">Sign up</a>
+        <!-- <span>{username}</span> -->
+
+    </div>
+</div>
+<div class="spacer"></div>
 
 <style>
     :global(body) {
@@ -13,7 +28,7 @@
         top: 0;
         left: 0;
         width: 100vw;
-        background-color: #2196F3;
+        background-color: #4285f4;
         color: white;
         display: flex;
         justify-content: space-between;
@@ -43,19 +58,22 @@
         gap: 1rem;
     }
 
+    .nav-left a,
+    .nav-right a {
+        text-decoration: none !important;
+        color: white !important;
+    }
+
     .icon {
         font-size: 1.3rem;
         cursor: pointer;
     }
+
+    .logo-link {
+        font-size: 1.3rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
 </style>
 
-<div class="navbar">
-    <div class="nav-left">
-         <span>PetSpark</span>
-    </div>
-    <div class="nav-right">
-        <span class="icon">🤍</span>
-        <span>{username}</span>
-    </div>
-</div>
-<div class="spacer"></div>

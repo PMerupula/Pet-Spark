@@ -1,9 +1,9 @@
 <!-- src/components/PetGrid.svelte -->
 <script lang="ts">
 
-    import catsImg from '../assets/Cats.png';
-    import crittersImg from '../assets/Critters.png';
-    import dogsImg from '../assets/Dogs.png';
+    import catsImg from '../../static/assets/Cats.png';
+    import crittersImg from '../../static/assets/Critters.png';
+    import dogsImg from '../../static/assets/Dogs.png';
 
 
     const placeholders = [catsImg, crittersImg, dogsImg];
