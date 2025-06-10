@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 # from pymongo.mongo_client import MongoClient
 # from pymongo.server_api import ServerApi
+from bson.objectid import ObjectId
 import os
 from dotenv import load_dotenv
 
@@ -11,13 +12,102 @@ class Database:
 		# mongoDB deployment's connection string.
 		self.__uri = os.getenv("MONGO_DB_URI")
 		self.__client = MongoClient(self.__uri)
+		self.__establish()
+
+	def __establish(self):
+		try:
+			self.__database = self.__client.pet_spark
+			print("Successfully got reference to mongoDB database.")
+		except Exception as e:
+			print("Error getting reference: ", e)
 
 	def ping(self):
 		try:
 			self.__client.admin.command('ping')
-			print("Successfully pinged mongoDB database.")
+			print("Successfully pinged mongoDB.")
 		except Exception as e:
-			print("Error pinging mongoDB database: ", e)
+			print("Error pinging mongoDB: ", e)
+
+	# person_table():
+	# 	id (auto-generated)
+	# 	name
+	# 	age
+	# 	gender
+	# 	allergens
+	# 	preferred animal
+	# 		type (defined by Pet Finders API: Get Animal Types)
+	# 		breed (defined by Pet Finders API: Get Animal Breeds)
+	# 		size (small, medium, large, xlarge)
+	# 		gender (male, female, unknown/Not Applicable)
+	# 		age
+	# 		color (defined by Pet Finders API: Get Animal Types)
+	# 		coat (short, medium, long, wire, hairless, curly)
+	# 		name (user may want an animal with a pre-established name)
+	# 		good_with_children
+	# 		good_with_dogs
+	# 		good_with_cats
+	# 		house_trained
+	# 		declawed
+	# 		special_needs
+	# 		vaccination status (saw this on the petdetails page, not sure how this is determined)
+	def __createPerson(self, name:str, age:int, gender:str, allergens:list, preferred_animal:dict):
+		# insert data into database
+		collection = self.__database.persons
+
+		docs = [{  # its in JSON format
+			# will auto-generate an _id field value if not specified
+			"name": name,
+			"age": age,
+			"gender": gender,
+			"allergens": allergens,
+			"preferred_animal": preferred_animal
+		}]
+		result = collection.insert_many(docs)
+		
+		return result.inserted_ids[0]
+
+	# user table:
+	# 	id (auto-generated)
+	# 	authentication token (or whatever unique aspect authenticated accounts have)
+	# 	user's person table id
+	# 	location
+	# 	"people living with user" person table ids
+	# 	living situation (house, apartment, etc.)
+	# 	living situation notes (defined by user)
+	# 	current animals
+	# 		type (defined by Pet Finders API: Get Animal Types)
+	# 		breed (defined by Pet Finders API: Get Animal Breeds)
+	# 		size (small, medium, large, xlarge)
+	# 		gender (male, female, unknown/Not Applicable)
+	# 		age
+	# 		color (defined by Pet Finders API: Get Animal Types)
+	# 		coat (short, medium, long, wire, hairless, curly)
+	# 		name
+	# 		good_with_dogs
+	# 		good_with_cats
+	# 		health (not sure how we want to define this, but here are some example aspects)
+	# 			vaccination status
+	# 			general status (bad, good, great)
+	def createUser(self,
+		name:str, age:int, gender:str, allergens:list, preferred_animal:dict,
+		authID, location, livingSituation:str, livingSituationNotes:str, currentAnimals:list
+	):
+		personTableID = self.__createPerson(name, age, gender, allergens, preferred_animal)
+		collection = self.__database.users
+
+		docs = [{  # its in JSON format
+			# will auto-generate an _id field value if not specified
+			"authID": authID,
+			"personTableID": personTableID,
+			"location": location,
+			"associatedPersons": [],
+			"livingSituation": livingSituation,
+			"livingSituationNotes": livingSituationNotes,
+			"currentAnimals": currentAnimals
+		}]
+		result = collection.insert_many(docs)
+
+		return result.inserted_ids[0]
 
 	# def getUserInformation():
 	# 	# user table:
@@ -64,7 +154,7 @@ class Database:
 	# 	# print(result)
 
 	# def getPersonInformation():
-		pass
+		# pass
 		# person table:
 		# 	id (auto-generated)
 		# 	name
@@ -92,10 +182,89 @@ class Database:
 def main():
 	print("starting")
 
-	database = Database()
-	database.ping()
+	# print(ObjectId("6847986a9d7f80c5de6ce678"))
+	# return
 
+	myDatabase = Database()
+	myDatabase.ping()
 
+	# create person example
+	# personTableID = myDatabase.__createPerson(
+	# 	"testName", 1, "testGender", ["testAllergy1", "testAllergy2"], {
+	# 		"type": "testType",
+	# 		"breed": "testBreed",
+	# 		"size": "testSize",
+	# 		"gender": "testGender",
+	# 		"age": 1,
+	# 		"color": "testColor",
+	# 		"coat": "testCoat",	
+	# 		"name": "testName",
+	# 		"good_with_children": True,
+	# 		"good_with_dogs": True,
+	# 		"good_with_cats": True,
+	# 		"house_trained": True,
+	# 		"declawed": True,
+	# 		"special_needs": True,
+	# 		"vaccination_status": "yes"
+	# 	}
+	# )
+	# print(personTableID)
+
+	# create user example
+	# personTableID = myDatabase.createUser(
+	# 	"myName", 1, "testGender", ["testAllergy1", "testAllergy2"], {
+	# 		"type": "testType",
+	# 		"breed": "testBreed",
+	# 		"size": "testSize",
+	# 		"gender": "testGender",
+	# 		"age": 1,
+	# 		"color": "testColor",
+	# 		"coat": "testCoat",	
+	# 		"name": "testName",
+	# 		"good_with_children": True,
+	# 		"good_with_dogs": True,
+	# 		"good_with_cats": True,
+	# 		"house_trained": True,
+	# 		"declawed": True,
+	# 		"special_needs": True,
+	# 		"vaccination_status": "yes"
+	# 	},
+	# 	"testAuthID", "testLocation", "testLivingSituation", "testLivingSituationNotes", [
+	# 		{
+	# 			"type": "testType",
+	# 			"breed": "testBreed",
+	# 			"size": "testSize",
+	# 			"gender": "testGender",
+	# 			"age": 1,
+	# 			"color": "testColor",
+	# 			"coat": "testCoat",	
+	# 			"name": "testName1",
+	# 			"good_with_dogs": True,
+	# 			"good_with_cats": True,
+	# 			"health": {
+	# 				"vaccination_status": "yes",
+	# 				"status": "testStatus"
+	# 			}
+	# 		},
+	# 		{
+	# 			"type": "testType",
+	# 			"breed": "testBreed",
+	# 			"size": "testSize",
+	# 			"gender": "testGender",
+	# 			"age": 1,
+	# 			"color": "testColor",
+	# 			"coat": "testCoat",	
+	# 			"name": "testName2",
+	# 			"good_with_dogs": True,
+	# 			"good_with_cats": True,
+	# 			"health": {
+	# 				"vaccination_status": "yes",
+	# 				"status": "testStatus"
+	# 			}
+	# 		}
+	# 	]
+	# )
+	# print(personTableID)
 
 	return
 
