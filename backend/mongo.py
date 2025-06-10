@@ -6,21 +6,111 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+class Database:
+	def __init__(self):
+		# mongoDB deployment's connection string.
+		self.__uri = os.getenv("MONGO_DB_URI")
+		self.__client = MongoClient(self.__uri)
+
+	def ping(self):
+		try:
+			self.__client.admin.command('ping')
+			print("Successfully pinged mongoDB database.")
+		except Exception as e:
+			print("Error pinging mongoDB database: ", e)
+
+	# def getUserInformation():
+	# 	# user table:
+	# 	# 	id (auto-generated)
+	# 	# 	authentication token (or whatever unique aspect authenticated accounts have)
+	# 	# 	user's person table id
+	# 	# 	location
+	# 	# 	"people living with user" person table ids
+	# 	# 	living situation (house, apartment, etc.)
+	# 	# 	living situation notes (defined by user)
+	# 	# 	current animals
+	# 	# 		type (defined by Pet Finders API: Get Animal Types)
+	# 	# 		breed (defined by Pet Finders API: Get Animal Breeds)
+	# 	# 		size (small, medium, large, xlarge)
+	# 	# 		gender (male, female, unknown/Not Applicable)
+	# 	# 		age
+	# 	# 		color (defined by Pet Finders API: Get Animal Types)
+	# 	# 		coat (short, medium, long, wire, hairless, curly)
+	# 	# 		name
+	# 	# 		good_with_dogs
+	# 	# 		good_with_cats
+	# 	# 		health (not sure how we want to define this, but here are some example aspects)
+	# 	# 			vaccination status
+	# 	# 			general status (bad, good, great)
+
+	# 	# insert data into database
+	# 	collection = database.comets
+
+	# 	# docs = [  # its in JSON format
+	# 	# 	{     # will auto-generate an _id field value if not specified
+	# 	# 		"name": "Comet 1",
+	# 	# 		"officialName": "Singula Cometus"
+	# 	# 	},
+	# 	# 	{
+	# 	# 		"name": "Comet 2",
+	# 	# 		"officialName": "Duo Cometi"
+	# 	# 	},
+	# 	# 	{
+	# 	# 		"name": "Comet 3",
+	# 	# 		"officialName": "Tri Cometi"
+	# 	# 	}
+	# 	# ]
+	# 	# result = collection.insert_many(docs)
+	# 	# print(result)
+
+	# def getPersonInformation():
+		pass
+		# person table:
+		# 	id (auto-generated)
+		# 	name
+		# 	age
+		# 	gender
+		# 	allergens
+		# 	preferred animal
+		# 		type (defined by Pet Finders API: Get Animal Types)
+		# 		breed (defined by Pet Finders API: Get Animal Breeds)
+		# 		size (small, medium, large, xlarge)
+		# 		gender (male, female, unknown/Not Applicable)
+		# 		age
+		# 		color (defined by Pet Finders API: Get Animal Types)
+		# 		coat (short, medium, long, wire, hairless, curly)
+		# 		name (user may want an animal with a pre-established name)
+		# 		good_with_children
+		# 		good_with_dogs
+		# 		good_with_cats
+		# 		house_trained
+		# 		declawed
+		# 		special_needs
+		# 		vaccination status (saw this on the petdetails page, not sure how this is determined)
+
+
 def main():
 	print("starting")
 
-	# MongoDB deployment's connection string.
-	uri = os.getenv("MONGO_DB_URI")
+	database = Database()
+	database.ping()
 
-	# client = MongoClient(uri, server_api=ServerApi('1'))
-	client = MongoClient(uri)
 
-	# Send a ping to confirm a successful connection
-	try:
-		client.admin.command('ping')
-		print("Pinged your deployment. You successfully connected to MongoDB!")
-	except Exception as e:
-		print(e)
+
+	return
+
+	# # MongoDB deployment's connection string.
+	# uri = os.getenv("MONGO_DB_URI")
+
+	# # client = MongoClient(uri, server_api=ServerApi('1'))
+	# client = MongoClient(uri)
+
+	# ping database
+	# try:
+	# 	client.admin.command('ping')
+	# 	print("Successfully pinged mongoDB database.")
+	# except Exception as e:
+	# 	print("Error pinging mongoDB database: ", e)
 
 	# getting data from database
 	# database = client.sample_guides
@@ -94,7 +184,7 @@ def main():
 	# deleting always results in an object with the number of entries deleted
 	# print("Entries deleted: ", result.deleted_count)
 
-	# Close the connection to MongoDB when you're done.
+	# close connection to database
 	client.close()
 
 if __name__ == "__main__":
