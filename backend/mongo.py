@@ -196,14 +196,20 @@ class Database:
 
 		print("Successfully updated person information.")
 
+	def closeConnection(self):
+		print("Closing connection to mongoDB...")
+		self.__client.close()
+		print("Successfully closed connection to mongoDB.")
+
 def main():
-	print("Starting")
+	print("Don't run this file directly.  import the Database class and create an instance of it.")
+	print("database = Database()")
 
 	# print(ObjectId("6847986a9d7f80c5de6ce678"))
 	# return
 
-	myDatabase = Database()
-	myDatabase.ping()
+	# myDatabase = Database()
+	# myDatabase.ping()
 
 	# create user example
 	# userPersonTableID = myDatabase.createUser(
@@ -320,10 +326,6 @@ def main():
 	# iterate code
 	# for doc in results:
 	# 	print(doc)
-
-	
-	# insert data into database
-	collection = database.comets
 
 	# close connection to database
 	client.close()
