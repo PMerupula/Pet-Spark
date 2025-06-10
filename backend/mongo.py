@@ -105,13 +105,13 @@ class Database:
 		authID, location, livingSituation:str, livingSituationNotes:str, currentAnimals:list
 	):
 		print("Creating user entry...")	
-		personTableID = self.__createPerson(name, age, gender, allergens, preferred_animal)
+		personID = self.__createPerson(name, age, gender, allergens, preferred_animal)
 		collection = self.__database.users
 
 		docs = [{  # its in JSON format
 			# will auto-generate an _id field value if not specified
 			"authID": authID,
-			"personTableID": personTableID,
+			"personTableID": personID,
 			"location": location,
 			"associatedPersons": [],
 			"livingSituation": livingSituation,
@@ -123,6 +123,14 @@ class Database:
 		print("Successfully created user entry.")
 		return result.inserted_ids[0]
 	
+	def removeUser(self, userID:str):
+		print("Removing user entry...")
+
+		collection = self.__database.users
+		collection.delete_one({"_id": ObjectId(userID)})
+
+		print("Successfully removed user entry.")
+
 	def addPersonToUser(self, userID:str,
 		name:str, age:int, gender:str, allergens:list, preferred_animal:dict
 	):
@@ -135,12 +143,12 @@ class Database:
 		print("Successfully added person to user's associated persons.")
 		return personID
 	
-	def removePersonFromUser(self, userID:str, personToRemovePersonTableID:str):
+	def removePersonFromUser(self, userID:str, personToRemovePersonID:str):
 		print("Removing person from user's associated persons...")
 		collection = self.__database.users
-		collection.update_one({"_id": ObjectId(userID)}, {"$pull": {"associatedPersons": ObjectId(personToRemovePersonTableID)}})
+		collection.update_one({"_id": ObjectId(userID)}, {"$pull": {"associatedPersons": ObjectId(personToRemovePersonID)}})
 		
-		self.__removePerson(personToRemovePersonTableID)
+		self.__removePerson(personToRemovePersonID)
 
 		print("Successfully removed person from user's associated persons.")
 
@@ -153,14 +161,40 @@ class Database:
 		print("Successfully got user information.")
 		return result
 
-	def getPersonInformation(self, personTableID:str):
+	def getPersonInformation(self, personID:str):
 		print("Getting person information...")
 		
 		collection = self.__database.persons
-		result = collection.find_one({"_id": ObjectId(personTableID)})
+		result = collection.find_one({"_id": ObjectId(personID)})
 
 		print("Successfully got person information.")
 		return result
+	
+	def updateUserInformation(self, userID:str, authID:str=None, location:str=None, livingSituation:str=None, livingSituationNotes:str=None, currentAnimals:list=None):
+		print("Updating user information...")
+
+		collection = self.__database.users
+
+		if(authID != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"authID": authID}})
+		if(location != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"location": location}})
+		if(livingSituation != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"livingSituation": livingSituation}})
+		if(livingSituationNotes != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"livingSituationNotes": livingSituationNotes}})
+		if(currentAnimals != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"currentAnimals": currentAnimals}})
+
+		print("Successfully updated user information.")
+	
+	def updatePersonInformation(self, personID:str, name:str=None, age:int=None, gender:str=None, allergens:list=None, preferred_animal:dict=None):
+		print("Updating person information...")	
+
+		collection = self.__database.persons
+
+		if(name != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"name": name}})
+		if(age != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"age": age}})
+		if(gender != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"gender": gender}})
+		if(allergens != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"allergens": allergens}})
+		if(preferred_animal != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal": preferred_animal}})
+
+		print("Successfully updated person information.")
 
 def main():
 	print("Starting")
@@ -262,23 +296,6 @@ def main():
 
 	return
 
-	# # MongoDB deployment's connection string.
-	# uri = os.getenv("MONGO_DB_URI")
-
-	# # client = MongoClient(uri, server_api=ServerApi('1'))
-	# client = MongoClient(uri)
-
-	# ping database
-	# try:
-	# 	client.admin.command('ping')
-	# 	print("Successfully pinged mongoDB database.")
-	# except Exception as e:
-	# 	print("Error pinging mongoDB database: ", e)
-
-	# getting data from database
-	# database = client.sample_guides
-	# collection = database.planets
-
 	# retrieve data from database
 	# results = collection.find()  # get all entries
 	# results = collection.find({  # get entries with matching aspect
@@ -307,45 +324,6 @@ def main():
 	
 	# insert data into database
 	collection = database.comets
-
-	# docs = [  # its in JSON format
-	# 	{     # will auto-generate an _id field value if not specified
-	# 		"name": "Comet 1",
-	# 		"officialName": "Singula Cometus"
-	# 	},
-	# 	{
-	# 		"name": "Comet 2",
-	# 		"officialName": "Duo Cometi"
-	# 	},
-	# 	{
-	# 		"name": "Comet 3",
-	# 		"officialName": "Tri Cometi"
-	# 	}
-	# ]
-	# result = collection.insert_many(docs)
-	# print(result)
-
-
-	# update data in database
-	
-	# doc = { 
-	# 	"$mul": {"radius": 1.5}  # take existing value and multiply it by this value
-	# }
-	# result = collection.update_many({}, doc)  # update all entries with attribute
-	# update operations result in an object with the amount of modified entries
-	# print("Entries updated: ", result.modifed_count)
-
-	
-	# delete data from database
-	# doc = {
-	# 	"radius": {
-	# 		"$gt": 2,
-	# 		"$lt": 2
-	# 	}
-	# }
-	# result = collection.delete_many(doc)  # deletes any entries matching criteria
-	# deleting always results in an object with the number of entries deleted
-	# print("Entries deleted: ", result.deleted_count)
 
 	# close connection to database
 	client.close()
