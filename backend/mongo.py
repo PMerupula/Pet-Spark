@@ -15,6 +15,7 @@ class Database:
 		self.__establish()
 
 	def __establish(self):
+		print("Establishing reference to mongoDB databse...")
 		try:
 			self.__database = self.__client.pet_spark
 			print("Successfully got reference to mongoDB database.")
@@ -22,35 +23,37 @@ class Database:
 			print("Error getting reference: ", e)
 
 	def ping(self):
+		print("Pinging mongoDB...")
 		try:
 			self.__client.admin.command('ping')
 			print("Successfully pinged mongoDB.")
 		except Exception as e:
 			print("Error pinging mongoDB: ", e)
 
-	# person_table():
-	# 	id (auto-generated)
-	# 	name
-	# 	age
-	# 	gender
-	# 	allergens
-	# 	preferred animal
-	# 		type (defined by Pet Finders API: Get Animal Types)
-	# 		breed (defined by Pet Finders API: Get Animal Breeds)
-	# 		size (small, medium, large, xlarge)
-	# 		gender (male, female, unknown/Not Applicable)
-	# 		age
-	# 		color (defined by Pet Finders API: Get Animal Types)
-	# 		coat (short, medium, long, wire, hairless, curly)
-	# 		name (user may want an animal with a pre-established name)
-	# 		good_with_children
-	# 		good_with_dogs
-	# 		good_with_cats
-	# 		house_trained
-	# 		declawed
-	# 		special_needs
-	# 		vaccination status (saw this on the petdetails page, not sure how this is determined)
+	# person info object keys:
+	# 	_id:  (string) unique ID in table
+	# 	name:  (string)
+	# 	age:  (int)
+	# 	gender:  (string)
+	# 	allergens:  (list of strings)
+	# 	preferred_animal:  (object) person's preferred animal with the following keys
+	# 		type:  (string) should match types found in Pet Finders API: Get Animal Types
+	# 		breed:  (string) should match breeds found in Pet Finders API: Get Animal Breeds
+	# 		size:  (string) small, medium, large, or xlarge
+	# 		gender:  (string) male, female, or unknown/Not Applicable
+	# 		age:  (int)
+	# 		color:  (string) should match colors found in Pet Finders API: Get Animal Types)
+	# 		coat:  (string) short, medium, long, wire, hairless, or curly
+	# 		name:  (string)
+	# 		good_with_children:  (boolean)
+	# 		good_with_dogs:  (boolean)
+	# 		good_with_cats:  (boolean)
+	# 		house_trained:  (boolean)
+	# 		declawed:  (boolean)
+	# 		special_needs:  (boolean)
+	# 		vaccination_status:  (string)
 	def __createPerson(self, name:str, age:int, gender:str, allergens:list, preferred_animal:dict):
+		print("Creating person entry...")
 		# insert data into database
 		collection = self.__database.persons
 
@@ -64,34 +67,44 @@ class Database:
 		}]
 		result = collection.insert_many(docs)
 		
+		print("Successfully created person entry.")
 		return result.inserted_ids[0]
 
-	# user table:
-	# 	id (auto-generated)
-	# 	authentication token (or whatever unique aspect authenticated accounts have)
-	# 	user's person table id
-	# 	location
-	# 	"people living with user" person table ids
-	# 	living situation (house, apartment, etc.)
-	# 	living situation notes (defined by user)
-	# 	current animals
-	# 		type (defined by Pet Finders API: Get Animal Types)
-	# 		breed (defined by Pet Finders API: Get Animal Breeds)
-	# 		size (small, medium, large, xlarge)
-	# 		gender (male, female, unknown/Not Applicable)
-	# 		age
-	# 		color (defined by Pet Finders API: Get Animal Types)
-	# 		coat (short, medium, long, wire, hairless, curly)
-	# 		name
-	# 		good_with_dogs
-	# 		good_with_cats
-	# 		health (not sure how we want to define this, but here are some example aspects)
-	# 			vaccination status
-	# 			general status (bad, good, great)
+	def __removePerson(self, personToRemovePersonTableID:str):
+		print("Removing person entry...")
+
+		collection = self.__database.persons
+		collection.delete_one({"_id": ObjectId(personToRemovePersonTableID)})
+
+		print("Successfully removed person entry.")
+
+	# user info object keys:
+	# 	_id:  (string) unique ID in table
+	# 	authID:  (string) user authentication token from logging in
+	# 	personTableID:  (string) user's ID in the person table
+	# 	location:  (string)  location
+	# 	associatedPersons:  (array of strings) person table ids
+	# 	livingSituation:  (string) living situation type
+	# 	livingSituationNotes:  (string) living situation notes defined by user
+	# 	currentAnimals:  (array of objects) animal objects with the following keys
+	# 		type:  (string) should match types found in Pet Finders API: Get Animal Types
+	# 		breed:  (string) should match breeds found in Pet Finders API: Get Animal Breeds
+	# 		size:  (string) small, medium, large, or xlarge
+	# 		gender:  (string) male, female, or unknown/Not Applicable
+	# 		age:  (int)
+	# 		color:  (string) should match colors found in Pet Finders API: Get Animal Types)
+	# 		coat:  (string) short, medium, long, wire, hairless, or curly
+	# 		name:  (string)
+	# 		good_with_dogs:  (boolean)
+	# 		good_with_cats:  (boolean)
+	# 		health:  (object with the following keys)
+	# 			vaccination_status:  (string)
+	# 			status:  (string) bad, good, great, other ones that we may want to add
 	def createUser(self,
 		name:str, age:int, gender:str, allergens:list, preferred_animal:dict,
 		authID, location, livingSituation:str, livingSituationNotes:str, currentAnimals:list
 	):
+		print("Creating user entry...")	
 		personTableID = self.__createPerson(name, age, gender, allergens, preferred_animal)
 		collection = self.__database.users
 
@@ -106,81 +119,33 @@ class Database:
 			"currentAnimals": currentAnimals
 		}]
 		result = collection.insert_many(docs)
-
+		
+		print("Successfully created user entry.")
 		return result.inserted_ids[0]
+	
+	def addPersonToUser(self, userID:str,
+		name:str, age:int, gender:str, allergens:list, preferred_animal:dict
+	):
+		print("Addding person to user's associated persons...")
+		personID = self.__createPerson(name, age, gender, allergens, preferred_animal)
 
-	# def getUserInformation():
-	# 	# user table:
-	# 	# 	id (auto-generated)
-	# 	# 	authentication token (or whatever unique aspect authenticated accounts have)
-	# 	# 	user's person table id
-	# 	# 	location
-	# 	# 	"people living with user" person table ids
-	# 	# 	living situation (house, apartment, etc.)
-	# 	# 	living situation notes (defined by user)
-	# 	# 	current animals
-	# 	# 		type (defined by Pet Finders API: Get Animal Types)
-	# 	# 		breed (defined by Pet Finders API: Get Animal Breeds)
-	# 	# 		size (small, medium, large, xlarge)
-	# 	# 		gender (male, female, unknown/Not Applicable)
-	# 	# 		age
-	# 	# 		color (defined by Pet Finders API: Get Animal Types)
-	# 	# 		coat (short, medium, long, wire, hairless, curly)
-	# 	# 		name
-	# 	# 		good_with_dogs
-	# 	# 		good_with_cats
-	# 	# 		health (not sure how we want to define this, but here are some example aspects)
-	# 	# 			vaccination status
-	# 	# 			general status (bad, good, great)
+		collection = self.__database.users
+		collection.update_one({"_id": ObjectId(userID)}, {"$push": {"associatedPersons": personID}})
 
-	# 	# insert data into database
-	# 	collection = database.comets
+		print("Successfully added person to user's associated persons.")
+		return personID
+	
+	def removePersonFromUser(self, userID:str, personToRemovePersonTableID:str):
+		print("Removing person from user's associated persons...")
+		collection = self.__database.users
+		collection.update_one({"_id": ObjectId(userID)}, {"$pull": {"associatedPersons": ObjectId(personToRemovePersonTableID)}})
+		
+		self.__removePerson(personToRemovePersonTableID)
 
-	# 	# docs = [  # its in JSON format
-	# 	# 	{     # will auto-generate an _id field value if not specified
-	# 	# 		"name": "Comet 1",
-	# 	# 		"officialName": "Singula Cometus"
-	# 	# 	},
-	# 	# 	{
-	# 	# 		"name": "Comet 2",
-	# 	# 		"officialName": "Duo Cometi"
-	# 	# 	},
-	# 	# 	{
-	# 	# 		"name": "Comet 3",
-	# 	# 		"officialName": "Tri Cometi"
-	# 	# 	}
-	# 	# ]
-	# 	# result = collection.insert_many(docs)
-	# 	# print(result)
-
-	# def getPersonInformation():
-		# pass
-		# person table:
-		# 	id (auto-generated)
-		# 	name
-		# 	age
-		# 	gender
-		# 	allergens
-		# 	preferred animal
-		# 		type (defined by Pet Finders API: Get Animal Types)
-		# 		breed (defined by Pet Finders API: Get Animal Breeds)
-		# 		size (small, medium, large, xlarge)
-		# 		gender (male, female, unknown/Not Applicable)
-		# 		age
-		# 		color (defined by Pet Finders API: Get Animal Types)
-		# 		coat (short, medium, long, wire, hairless, curly)
-		# 		name (user may want an animal with a pre-established name)
-		# 		good_with_children
-		# 		good_with_dogs
-		# 		good_with_cats
-		# 		house_trained
-		# 		declawed
-		# 		special_needs
-		# 		vaccination status (saw this on the petdetails page, not sure how this is determined)
-
+		print("Successfully removed person from user's associated persons.")
 
 def main():
-	print("starting")
+	print("Starting")
 
 	# print(ObjectId("6847986a9d7f80c5de6ce678"))
 	# return
@@ -188,30 +153,8 @@ def main():
 	myDatabase = Database()
 	myDatabase.ping()
 
-	# create person example
-	# personTableID = myDatabase.__createPerson(
-	# 	"testName", 1, "testGender", ["testAllergy1", "testAllergy2"], {
-	# 		"type": "testType",
-	# 		"breed": "testBreed",
-	# 		"size": "testSize",
-	# 		"gender": "testGender",
-	# 		"age": 1,
-	# 		"color": "testColor",
-	# 		"coat": "testCoat",	
-	# 		"name": "testName",
-	# 		"good_with_children": True,
-	# 		"good_with_dogs": True,
-	# 		"good_with_cats": True,
-	# 		"house_trained": True,
-	# 		"declawed": True,
-	# 		"special_needs": True,
-	# 		"vaccination_status": "yes"
-	# 	}
-	# )
-	# print(personTableID)
-
 	# create user example
-	# personTableID = myDatabase.createUser(
+	# userPersonTableID = myDatabase.createUser(
 	# 	"myName", 1, "testGender", ["testAllergy1", "testAllergy2"], {
 	# 		"type": "testType",
 	# 		"breed": "testBreed",
@@ -264,7 +207,32 @@ def main():
 	# 		}
 	# 	]
 	# )
-	# print(personTableID)
+	# print(userPersonTableID)
+
+	# add associated person to user
+	# addedPersonPersonTableID = myDatabase.addPersonToUser("6847aef2c81abe261e2026e9",
+	# 	"testAssociate", 1, "testGender", ["testAllergy1", "testAllergy2"], {
+	# 		"type": "testType",
+	# 		"breed": "testBreed",
+	# 		"size": "testSize",
+	# 		"gender": "testGender",
+	# 		"age": 1,
+	# 		"color": "testColor",
+	# 		"coat": "testCoat",	
+	# 		"name": "testNameA",
+	# 		"good_with_children": True,
+	# 		"good_with_dogs": True,
+	# 		"good_with_cats": True,
+	# 		"house_trained": True,
+	# 		"declawed": True,
+	# 		"special_needs": True,
+	# 		"vaccination_status": "yes"
+	# 	}
+	# )
+	# print(addedPersonPersonTableID)
+
+	# remove associated person from user
+	# myDatabase.removePersonFromUser("6847aef2c81abe261e2026e9", "6847b15abc34d2315545b732")
 
 	return
 
