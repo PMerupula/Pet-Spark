@@ -144,6 +144,24 @@ class Database:
 
 		print("Successfully removed person from user's associated persons.")
 
+	def getUserInformation(self, userID:str):
+		print("Getting user information...")
+		
+		collection = self.__database.users
+		result = collection.find_one({"_id": ObjectId(userID)})
+
+		print("Successfully got user information.")
+		return result
+
+	def getPersonInformation(self, personTableID:str):
+		print("Getting person information...")
+		
+		collection = self.__database.persons
+		result = collection.find_one({"_id": ObjectId(personTableID)})
+
+		print("Successfully got person information.")
+		return result
+
 def main():
 	print("Starting")
 
@@ -233,6 +251,14 @@ def main():
 
 	# remove associated person from user
 	# myDatabase.removePersonFromUser("6847aef2c81abe261e2026e9", "6847b15abc34d2315545b732")
+
+	# get user information
+	# userInfo = myDatabase.getUserInformation("6847aef2c81abe261e2026e9")
+	# print(userInfo)
+
+	# get person information
+	# personInfo = myDatabase.getPersonInformation("6847aef2c81abe261e2026e8")
+	# print(personInfo)
 
 	return
 
