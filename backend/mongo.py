@@ -205,6 +205,8 @@ def main():
 	print("Don't run this file directly.  import the Database class and create an instance of it.")
 	print("database = Database()")
 
+	return
+
 	# print(ObjectId("6847986a9d7f80c5de6ce678"))
 	# return
 
