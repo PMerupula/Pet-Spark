@@ -33,7 +33,6 @@
   let age = "";
   let breed = "";
   let location = "Davis, CA"; // Davis for default, to show how it's formatted
-  let lastLocation = ""; 
 
   const dogBreeds = ["Labrador Retriever", "German Shepherd", "Golden Retriever", "Bulldog", "Poodle"];
   const catBreeds = ["Domestic Short Hair", "Domestic Long Hair", "Siamese", "Persian", "Maine Coon"];
@@ -122,8 +121,11 @@
       const params = new URLSearchParams();
       
       if (type.length > 0) {
-        params.append('type', type.join(','));
+        type.forEach(t => {
+          params.append('type', t);
+        });
       }
+      
       if (gender) {
         params.append('gender', gender);
       }
@@ -143,9 +145,7 @@
       const response = await fetch(`http://127.0.0.1:5000/api/pets?${params.toString()}`);
       const data = await response.json();
       
-      console.log('Filtered pets API Response:', data);
-      
-      filteredPets = data.animals?.map((animal, i) => ({
+      const processedPets = data.animals?.map((animal, i) => ({
         id: `filtered_${i}`,
         name: animal.name,
         image: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || '/assets/placeholder.png',
@@ -156,8 +156,8 @@
         petId: animal.id
       })) || [];
       
-      if (filteredPets.length > 0) {
-        pets = filteredPets;
+      if (processedPets.length > 0) {
+        pets = processedPets;
         index = 0; 
         console.log('Updated carousel with filtered pets:', pets);
       } else {
@@ -185,14 +185,14 @@
     error = null;
   }
 
-  // Fetches the recommended pets based on current location
-  async function fetchRecommendedPets() {
+  async function fetchRandomPetsForRecommendation() {
     try {
       recommendedLoading = true;
-      const response = await fetch(`http://127.0.0.1:5000/api/pets?location=${encodeURIComponent(location)}&sort=random&limit=8`);
+      // Get 20 random pets
+      const response = await fetch(`http://127.0.0.1:5000/api/pets?sort=random&limit=20`);
       const data = await response.json();
       
-      console.log('Home page recommended pets API Response:', data);
+      console.log('Random pets for recommendation:', data);
       
       if (data.animals && data.animals.length > 0) {
         recommendedPets = data.animals.map(animal => ({
@@ -206,14 +206,12 @@
           about: animal.description || 'No description available',
           imageUrl: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || ''
         }));
-        
-        console.log('Processed recommended pets for home:', recommendedPets);
       } else {
         recommendedPets = [];
       }
       
     } catch (err) {
-      console.error('Error fetching recommended pets:', err);
+      console.error('Error fetching random pets:', err);
       recommendedPets = [];
     } finally {
       recommendedLoading = false;
@@ -221,15 +219,9 @@
   }
 
   onMount(() => {
-    lastLocation = location;
-    fetchRecommendedPets();
+    fetchRandomPetsForRecommendation(); 
     fetchPetsForCarousel();
   });
-
-  $: if (location && location !== lastLocation) {
-    lastLocation = location;
-    fetchRecommendedPets();
-  }
 </script>
 
 <main>
@@ -359,9 +351,11 @@
   </section>
 
   <section class="recommended">
-    <h2>Recommended Pets for You</h2>
+    <h2>Give These Pets a Chance! 🐾</h2>
+    <p class="section-subtitle">These amazing pets are looking for their forever homes</p>
+    
     {#if recommendedLoading}
-      <p style="text-align: center; color: #666;">🐾 Loading recommended pets...</p>
+      <p style="text-align: center; color: #666;">🐾 Loading pets...</p>
     {:else if recommendedPets.length > 0}
       <div class="pets-container">
         {#each recommendedPets as pet}
@@ -379,7 +373,7 @@
         {/each}
       </div>
     {:else}
-      <p style="text-align: center; color: #666;">No pets found in this location. Try changing your location filter.</p>
+      <p style="text-align: center; color: #666;">No pets available right now. Check back soon!</p>
     {/if}
   </section>
 </main>
@@ -900,5 +894,13 @@
     font-weight: bold;
     color: #333;
     margin-right: 1rem;
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    font-style: italic;
   }
 </style>
