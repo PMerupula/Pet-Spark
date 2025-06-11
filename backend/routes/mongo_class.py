@@ -160,11 +160,9 @@ class Database:
 		result = None
 		
 		if(userID != None):
-			print("User ID: ", userID)
 			result = collection.find_one({"_id": ObjectId(userID)})
 		
 		elif(authID != None):
-			print("Auth ID: ", authID)
 			result = collection.find_one({"authID": authID})
 
 		print("Successfully got user information.")

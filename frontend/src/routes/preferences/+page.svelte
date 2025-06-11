@@ -1,11 +1,14 @@
 <script>
   import { updateUserInDB } from '$lib/mongo/mongo';
 
-  let type = "";
-  let breed = "";
-  let age = "";
-  let gender = "";
-  let size = "";
+  let userName = "";
+  let userAge = "";
+  let userGender = "";
+  let petType = "";
+  let petBreed = "";
+  let petAge = "";
+  let petGender = "";
+  let petSize = "";
   let location = "";
 
   const dogBreeds = [
@@ -28,9 +31,9 @@
   ];
 
   const breeds = {
-    dog: dogBreeds,
-    cat: catBreeds,
-    rabbit: rabbitBreeds
+    "dog": dogBreeds,
+    "cat": catBreeds,
+    "rabbit": rabbitBreeds
   };
 
   async function handleSubmit() {
@@ -45,8 +48,11 @@
 
     let errorMessage = "";
 
-    const result = await updateUserInDB(location, type, breed, age, gender, size);
-    if (!result.success){
+    const result = await updateUserInDB(
+      { name: userName, age: userAge, gender: userGender, location: location },
+      { type: petType, breed: petBreed, age: petAge, gender: petGender, size: petSize }
+    );
+    if(!result.success){
       errorMessage = result.message;
       alert(errorMessage);
     }
@@ -56,7 +62,35 @@
 </script>
 
 <main class="filter-form">
-  <h2>Set Your Pet Preferences</h2>
+  <h2>Set Your Account Preferences</h2>
+  <p>Leave blank if you don't want to update</p>
+
+  <div class="field">
+    <label>Name</label>
+    <input
+      type="text"
+      bind:value={userName}
+      placeholder=""
+    />
+  </div>
+
+  <div class="field">
+    <label>Age</label>
+    <input
+      type="text"
+      bind:value={userAge}
+      placeholder=""
+    />
+  </div>
+
+  <div class="field">
+    <label>Gender</label>
+    <input
+      type="text"
+      bind:value={userGender}
+      placeholder="e.g  he/him, she/her, they/them"
+    />
+  </div>
 
   <div class="field">
     <label>Location</label>
@@ -67,10 +101,15 @@
     />
   </div>
 
+  <div>
+    <h3>Pet Preferences</h3>
+  </div>
+
   <div class="field">
-    <label>Pet Type</label>
-    <select bind:value={type}>
-      <option value="">Any</option>
+    <label>Type</label>
+    <select bind:value={petType}>
+      <option value=""></option>
+      <option value="any">Any</option>
       <option value="dog">Dog</option>
       <option value="cat">Cat</option>
       <option value="rabbit">Critter</option>
@@ -79,9 +118,10 @@
 
   <div class="field">
     <label>Breed</label>
-    <select bind:value={breed}>
-      <option value="">Any</option>
-      {#each breeds[type] as b}
+    <select bind:value={petBreed}>
+      <option value=""></option>
+      <option value="any">Any</option>
+      {#each breeds[petType] as b}
         <option value={b}>{b}</option>
       {/each}
     </select>
@@ -89,8 +129,9 @@
 
   <div class="field">
     <label>Age</label>
-    <select bind:value={age}>
-      <option value="">Any</option>
+    <select bind:value={petAge}>
+      <option value=""></option>
+      <option value="any">Any</option>
       <option value="baby">Kitten/Puppy</option>
       <option value="young">Young</option>
       <option value="adult">Adult</option>
@@ -100,8 +141,9 @@
 
   <div class="field">
     <label>Gender</label>
-    <select bind:value={gender}>
-      <option value="">Any</option>
+    <select bind:value={petGender}>
+      <option value=""></option>
+      <option value="any">Any</option>
       <option value="male">Male</option>
       <option value="female">Female</option>
     </select>
@@ -109,8 +151,9 @@
 
   <div class="field">
     <label>Size</label>
-    <select bind:value={size}>
-      <option value="">Any</option>
+    <select bind:value={petSize}>
+      <option value=""></option>
+      <option value="any">Any</option>
       <option value="small">Small</option>
       <option value="medium">Medium</option>
       <option value="large">Large</option>
@@ -132,9 +175,16 @@
     font-family: sans-serif;
   }
 
-  h2 {
+  h2, h3 {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
+  }
+
+
+  p{
+    text-align: center;
+    margin-top: 0;
+    font-size: 0.8rem;
   }
 
   .field {

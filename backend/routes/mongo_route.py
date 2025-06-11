@@ -6,12 +6,8 @@ from dotenv import load_dotenv
 from .mongo_class import Database
 
 load_dotenv()
-# print("Environment variables loaded from .env file.")
 
 mongo = Blueprint("mongo", __name__)
-
-# AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
-
 
 @mongo.route("/api/mongo/createUser", methods=["POST"])
 def createUser():
@@ -39,14 +35,45 @@ def createUser():
 @mongo.route("/api/mongo/updateUserPerson", methods=["POST"])
 def updateUserPerson():
 	request_data = request.get_json()
+
+	# print("request_data: ", request_data)
+
 	userAuthID = request_data.get("authID")
-	userLocation = request_data.get("location")
+	userDetails = request_data.get("newUserDetails")
+	petDetails = request_data.get("newPetDetails")
+
+	# print("authID: ", userAuthID)
+	# print("userDetails: ", userDetails)
+	# print("petDetails: ", petDetails)
+
+	userName = None
+	userAge = None
+	userGender = None
+	userLocation = None
+
+	if(userDetails["name"] != ""): userName = userDetails["name"]
+	if(userDetails["age"] != ''): userAge = userDetails["age"]
+	if(userDetails["gender"] != ""): userGender = userDetails["gender"]
+	if(userDetails["location"] != ""): userLocation = userDetails["location"]
+
+	petType = None
+	petBreed = None
+	petAge = None
+	petGender = None
+	petSize = None
+
+	if(petDetails["type"] != ""): petType = petDetails["type"]
+	if(petDetails["breed"] != ""): petBreed = petDetails["breed"]
+	if(petDetails["age"] != ""): petAge = petDetails["age"]
+	if(petDetails["gender"] != ""): petGender = petDetails["gender"]
+	if(petDetails["size"] != ""): petSize = petDetails["size"]
+
 	preferredAnimal = {
-		"type": request_data.get("type"),
-		"breed": request_data.get("breed"),
-		"age": request_data.get("age"),
-		"gender": request_data.get("gender"),
-		"size": request_data.get("size")
+		"type": petType,
+		"breed": petBreed,
+		"age": petAge,
+		"gender": petGender,
+		"size": petSize
 	}
 
 	try:
@@ -55,7 +82,7 @@ def updateUserPerson():
 		personID = userInfo["personTableID"]
 
 		database.updateUserInformation(authID=userAuthID, location=userLocation)
-		database.updatePersonInformation(personID=personID, preferred_animal=preferredAnimal)
+		database.updatePersonInformation(personID=personID, name=userName, age=userAge, gender=userGender, preferred_animal=preferredAnimal)
 
 		database.closeConnection()
 		return jsonify({"success": "egg"}), 200

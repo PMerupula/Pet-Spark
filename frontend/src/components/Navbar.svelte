@@ -19,7 +19,7 @@
 
     <div class="nav-right">
         {#if $isAuthenticated}
-            <a href="/preferences" class="heart-btn" aria-label="Preferences">❤️</a>
+            <a href="/preferences" class="preferences-icon" aria-label="Preferences">♥️</a>
             <a href="#" on:click|preventDefault={handleLogout}>Log out</a>
         {:else}
         <a href="/auth/login">Log in</a>
@@ -88,6 +88,10 @@
         font-size: 1.3rem;
         font-weight: bold;
         letter-spacing: 1px;
+    }
+
+    .preferences-icon {
+        font-size: 1.3rem;
     }
 
 </style>

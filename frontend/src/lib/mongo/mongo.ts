@@ -3,7 +3,7 @@
 const mongoRoute = 'http://127.0.0.1:5000/api/mongo/updateUserPerson';
 import { userID } from '../../authStore';
 
-export async function updateUserInDB(location:string, type:string, breed:string, age:string, gender:string, size:string): Promise<{ success: boolean; message: string }> {
+export async function updateUserInDB(newUserDetails:object, newPetDetails:object): Promise<{ success: boolean; message: string }> {
 	try{
 		let authID:any
 		userID.subscribe(value => authID = value);
@@ -13,7 +13,7 @@ export async function updateUserInDB(location:string, type:string, breed:string,
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ authID, location, type, breed, age, gender, size })
+			body: JSON.stringify({authID, newUserDetails, newPetDetails})
 		});
 		const data = await response.json();
 		console.log("mongo data: ", data);
