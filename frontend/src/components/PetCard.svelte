@@ -73,12 +73,11 @@
 <div class="container">
   <div class="left">
     <img src={imageUrl} alt="Pet image" class="pet-img" />
-    <button class="like-btn">❤️</button>
   </div>
 
   <div class="right">
     <h2>{name}</h2>
-    <p><strong>Location:</strong> {location}</p>
+    <p><strong>Location:</strong> {qlocation}</p>
     <p><strong>Age:</strong> {age}</p>
     <p><strong>Gender:</strong> {gender}</p>
     <p><strong>Color:</strong> {color}</p>
