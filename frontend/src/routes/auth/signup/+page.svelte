@@ -5,7 +5,6 @@
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let phone = "";
   let errorMessage = "";
 
   async function handleSignup() 
@@ -47,7 +46,6 @@
       placeholder="Confirm password"
       required
     />
-    <input type="tel" bind:value={phone} placeholder="Phone number" required />
     <button type="submit">Create Account</button>
   </form>
 

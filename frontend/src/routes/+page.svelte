@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import PetCard from '../components/PetCard.svelte'; 
-  
+
 
   let defaultPets = [
     { id: 1, name: "Ginger", image: "/assets/u126.png" },
@@ -11,7 +11,7 @@
     { id: 5, name: "Max", image: "/assets/1226328232.png" }
   ];
 
-  let pets = [...defaultPets];
+  let pets = [];
   let recommendedPets = [];
   let loading = false;
   let error = null;
@@ -73,6 +73,33 @@
       error = 'Failed to load pet details';
     }
   }
+
+  async function fetchPetsForCarousel() {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/api/pets?location=${encodeURIComponent(location)}&sort=random&limit=5`);
+      const data = await res.json();
+      if (data.animals && data.animals.length > 0) {
+        pets = data.animals.map(animal => ({
+          id: animal.id,
+          name: animal.name,
+          image: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || '/assets/placeholder.png',
+          realPet: true,
+          location: `${animal.contact.address.city}, ${animal.contact.address.state}`,
+          age: animal.age,
+          gender: animal.gender,
+          petId: animal.id
+        }));
+        index = 0;
+      } else {
+        pets = [...defaultPets];
+        index = 0;
+      }
+    } catch (err) {
+      pets = [...defaultPets];
+      index = 0;
+    }
+  }
+
 
   function closeModal() {
     showModal = false;
@@ -194,8 +221,9 @@
   }
 
   onMount(() => {
-    lastLocation = location; 
+    lastLocation = location;
     fetchRecommendedPets();
+    fetchPetsForCarousel();
   });
 
   $: if (location && location !== lastLocation) {
@@ -214,27 +242,33 @@
 
   <!-- Carousel -->
   <section class="carousel">
-    <button class="arrow prev" on:click={prev}>&lt;</button>
-    <div class="card">
-      {#if pets[index]?.realPet}
-        <div class="real-pet-info" on:click={() => showPetDetails(pets[index])} style="cursor: pointer;">
-          <img src={pets[index].image} alt={pets[index].name} />
-          <div class="pet-overlay">
-            <h3>{pets[index].name}</h3>
-            <p>{pets[index].location}</p>
-            <p>{pets[index].age} • {pets[index].gender}</p>
-            <p class="click-hint">Click for details</p>
+    {#if pets.length === 0}
+      <div class="card" style="display:flex;align-items:center;justify-content:center;color:#888;font-size:1.5rem;">
+        Loading pets...
+      </div>
+    {:else}
+      <button class="arrow prev" on:click={prev}>&lt;</button>
+      <div class="card">
+        {#if pets[index]?.realPet}
+          <div class="real-pet-info" on:click={() => showPetDetails(pets[index])} style="cursor: pointer;">
+            <img src={pets[index].image} alt={pets[index].name} />
+            <div class="pet-overlay">
+              <h3>{pets[index].name}</h3>
+              <p>{pets[index].location}</p>
+              <p>{pets[index].age} • {pets[index].gender}</p>
+              <p class="click-hint">Click for details</p>
+            </div>
           </div>
-        </div>
-      {:else}
-        <!-- Stock photo -->
-        <a href={`/petdetails/${pets[index]?.id}`}>
-          <img src={pets[index]?.image} alt={pets[index]?.name} style="cursor:pointer;" />
-        </a>
-      {/if}
-    </div>
-    <button class="arrow next" on:click={next}>&gt;</button>
+        {:else}
+          <a href={`/petdetails/${pets[index]?.id}`}>
+            <img src={pets[index]?.image} alt={pets[index]?.name} style="cursor:pointer;" />
+          </a>
+        {/if}
+      </div>
+      <button class="arrow next" on:click={next}>&gt;</button>
+    {/if}
   </section>
+
 
   <div class="dots">
     {#each pets as _, i}
