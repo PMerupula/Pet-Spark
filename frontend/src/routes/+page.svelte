@@ -145,13 +145,7 @@
       const response = await fetch(`http://127.0.0.1:5000/api/pets?${params.toString()}`);
       const data = await response.json();
       
-<<<<<<< HEAD
       const processedPets = data.animals?.map((animal, i) => ({
-=======
-      console.log('Filtered pets API Response:', data);
-      
-      let filteredPets = data.animals?.map((animal, i) => ({
->>>>>>> c998153d431a6ecae20d0de257c7a0fbd8bbcf11
         id: `filtered_${i}`,
         name: animal.name,
         image: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || '/assets/placeholder.png',
