@@ -21,10 +21,8 @@
     }
     else
     {
-      goto('/dashboard');
+      goto('/');
     }
-
-
   }
 </script>
 

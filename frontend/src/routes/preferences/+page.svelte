@@ -56,8 +56,6 @@
       errorMessage = result.message;
       alert(errorMessage);
     }
-
-
   }
 </script>
 

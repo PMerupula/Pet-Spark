@@ -202,7 +202,11 @@ class Database:
 		if(age != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"age": age}})
 		if(gender != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"gender": gender}})
 		if(allergens != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"allergens": allergens}})
-		if(preferred_animal != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal": preferred_animal}})
+		if(preferred_animal["type"] != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal.type": preferred_animal["type"]}})
+		if(preferred_animal["breed"] != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal.breed": preferred_animal["breed"]}})
+		if(preferred_animal["age"] != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal.age": preferred_animal["age"]}})
+		if(preferred_animal["gender"] != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal.gender": preferred_animal["gender"]}})
+		if(preferred_animal["size"] != None): collection.update_one({"_id": ObjectId(personID)}, {"$set": {"preferred_animal.size": preferred_animal["size"]}})
 
 		print("Successfully updated person information.")
 

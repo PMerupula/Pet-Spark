@@ -1,15 +1,18 @@
 <script>
   import { onMount } from 'svelte';
   import PetCard from '../../components/PetCard.svelte';
+  import { getUserPreferences, verifyUserLoggedIn } from '$lib/mongo/mongo';
   
   let pets = [];
   let loading = true;
   let error = null;
 
-  let type = [];
-  let gender = "";
-  let age = "";
-  let breed = "";
+  let petTypeDog = false;
+  let petTypeCat = false;
+  let petTypeRabbit = false;
+  let petGender = "";
+  let petAge = "";
+  let petBreed = "";
   let location = "Davis, CA"; 
   let limit = 50; 
 
@@ -25,17 +28,25 @@
     try {
       const params = new URLSearchParams();
       
-      if (type.length > 0) {
-        params.append('type', type.join(','));
+      if (petTypeDog || petTypeCat || petTypeRabbit) {
+        let dummyArr = [];
+        if(petTypeDog) dummyArr.push("dog");
+        if(petTypeCat) dummyArr.push("cat");
+        if(petTypeRabbit) dummyArr.push("rabbit");
+
+        if(!petTypeDog && !petTypeCat && !petTypeRabbit) dummyArr = ["dog", "cat", "rabbit"];
+
+        params.append('type', dummyArr.join(','));
       }
-      if (gender) {
-        params.append('gender', gender);
+      if (petGender) {
+
+        params.append('gender', petGender);
       }
-      if (age) {
-        params.append('age', age);
+      if (petAge) {
+        params.append('age', petAge);
       }
-      if (breed) {
-        params.append('breed', breed);
+      if (petBreed) {
+        params.append('breed', petBreed);
       }
       if (location) {
         params.append('location', location);
@@ -44,6 +55,8 @@
       // Add limit parameter
       params.append('limit', limit);
       params.append('sort', 'random');
+
+      console.log("params: ", params.toString());
       
       const response = await fetch(`http://127.0.0.1:5000/api/pets?${params.toString()}`);
       const data = await response.json();
@@ -74,23 +87,56 @@
   }
 
   function applyFilter() {
-    console.log('Applying filters:', { type, gender, age, breed, location, limit });
+    console.log('Applying filters:', { petTypeDog, petTypeCat, petTypeRabbit, petGender, petAge, petBreed, location, limit });
     fetchPets();
   }
 
   function resetFilters() {
-    type = [];
-    gender = "";
-    age = "";
-    breed = "";
+    petTypeDog = false;
+    petTypeCat = false;
+    petTypeRabbit = false;
+    petGender = "";
+    petAge = "";
+    petBreed = "";
     location = "Davis, CA"; 
     limit = 50;
     fetchPets();
   }
 
   onMount(() => {
-    fetchPets();
+    loadUserPreferences();
   });
+
+  async function loadUserPreferences() {
+    const responseToUserLoggedIn = await verifyUserLoggedIn();
+    if(!responseToUserLoggedIn.success){
+      console.log("User not logged in (svelte)");
+      fetchPets();
+      return;
+    }
+    
+    let errorMessage = "";
+    const result = await getUserPreferences();
+    if(!result.success){
+      errorMessage = result.message;
+      alert(errorMessage);
+    }
+
+    const data = result["data"];
+    const userData = data["userInfo"];
+    const preferredAnimalData = data["personInfo"]["preferred_animal"];
+
+    if(userData["location"] !== null && userData["location"] !== "any") location = userData["location"];
+    if(preferredAnimalData["type"] === "dog") petTypeDog = true;
+    if(preferredAnimalData["type"] === "cat") petTypeCat = true;
+    if(preferredAnimalData["type"] === "rabbit") petTypeRabbit = true;
+    if(preferredAnimalData["gender"] !== null && preferredAnimalData["gender"] !== "any") petGender = preferredAnimalData["gender"];
+    if(preferredAnimalData["age"] !== null && preferredAnimalData["age"] !== "any") petAge = preferredAnimalData["age"];
+    if(preferredAnimalData["breed"] !== null && preferredAnimalData["breed"] !== "any") petBreed = preferredAnimalData["breed"];
+
+    console.log("type: ", petTypeDog, petTypeCat, petTypeRabbit);
+    fetchPets();
+  }
 </script>
 
 <main>
@@ -110,19 +156,19 @@
         <span class="filter-label">I'm looking for…</span>
         <div class="type-options">
           <label class="type-option">
-            <input type="checkbox" bind:group={type} value="dog" />
+            <input type="checkbox" bind:checked={petTypeDog} />
             <img src="/assets/Dogs.png" alt="Dogs" class="type-icon" />
             <span>Dogs</span>
           </label>
 
           <label class="type-option">
-            <input type="checkbox" bind:group={type} value="cat" />
+            <input type="checkbox" bind:checked={petTypeCat} />
             <img src="/assets/Cats.png" alt="Cats" class="type-icon" />
             <span>Cats</span>
           </label>
 
           <label class="type-option">
-            <input type="checkbox" bind:group={type} value="rabbit" />
+            <input type="checkbox" bind:checked={petTypeRabbit} />
             <img src="/assets/Critters.png" alt="Critters" class="type-icon" />
             <span>Critters</span>
           </label>
@@ -141,7 +187,7 @@
 
         <div class="filter-item">
           <label>Gender</label>
-          <select bind:value={gender}>
+          <select bind:value={petGender}>
             <option value="">All genders</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -150,7 +196,7 @@
 
         <div class="filter-item">
           <label>Age</label>
-          <select bind:value={age}>
+          <select bind:value={petAge}>
             <option value="">All ages</option>
             <option value="baby">Baby</option>
             <option value="young">Young</option>
@@ -161,15 +207,15 @@
 
         <div class="filter-item">
           <label>Breed</label>
-          <select bind:value={breed}>
+          <select bind:value={petBreed}>
             <option value="">All breeds</option>
-            {#if type.includes('dog')}
+            {#if petTypeDog}
               {#each breeds.dog as b}<option value={b}>{b}</option>{/each}
             {/if}
-            {#if type.includes('cat')}
+            {#if petTypeCat}
               {#each breeds.cat as b}<option value={b}>{b}</option>{/each}
             {/if}
-            {#if type.includes('rabbit')}
+            {#if petTypeRabbit}
               {#each breeds.rabbit as b}<option value={b}>{b}</option>{/each}
             {/if}
           </select>

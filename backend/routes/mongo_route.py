@@ -51,10 +51,14 @@ def updateUserPerson():
 	userGender = None
 	userLocation = None
 
-	if(userDetails["name"] != ""): userName = userDetails["name"]
-	if(userDetails["age"] != ''): userAge = userDetails["age"]
-	if(userDetails["gender"] != ""): userGender = userDetails["gender"]
-	if(userDetails["location"] != ""): userLocation = userDetails["location"]
+	if(userDetails["name"] != "" and userDetails["name"] != None):
+		userName = userDetails["name"]
+	if(userDetails["age"] != '' and userDetails["age"] != None):
+		userAge = userDetails["age"]
+	if(userDetails["gender"] != "" and userDetails["gender"] != None):
+		userGender = userDetails["gender"]
+	if(userDetails["location"] != "" and userDetails["location"] != None):
+		userLocation = userDetails["location"]
 
 	petType = None
 	petBreed = None
@@ -62,11 +66,18 @@ def updateUserPerson():
 	petGender = None
 	petSize = None
 
-	if(petDetails["type"] != ""): petType = petDetails["type"]
-	if(petDetails["breed"] != ""): petBreed = petDetails["breed"]
-	if(petDetails["age"] != ""): petAge = petDetails["age"]
-	if(petDetails["gender"] != ""): petGender = petDetails["gender"]
-	if(petDetails["size"] != ""): petSize = petDetails["size"]
+	print("\n\nbreed: ", petDetails["breed"])
+
+	if(petDetails["type"] != "" and petDetails["type"] != None):
+		petType = petDetails["type"]
+	if(petDetails["breed"] != "" and petDetails["breed"] != None):
+		petBreed = petDetails["breed"]
+	if(petDetails["age"] != "" and petDetails["age"] != None):
+		petAge = petDetails["age"]
+	if(petDetails["gender"] != "" and petDetails["gender"] != None):
+		petGender = petDetails["gender"]
+	if(petDetails["size"] != "" and petDetails["size"] != None):
+		petSize = petDetails["size"]
 
 	preferredAnimal = {
 		"type": petType,
@@ -91,3 +102,19 @@ def updateUserPerson():
 		print("Error upddating user person: ", e)
 		return jsonify({"error": e}), 500
 	
+
+@mongo.route("/api/mongo/getUserInfo", methods=["POST"])
+def getUserInfo():
+	request_data = request.get_json()
+	userAuthID = request_data.get("authID")
+
+	database = Database()
+	userInfo = database.getUserInformation(authID=userAuthID)
+	personInfo = database.getPersonInformation(personID=userInfo["personTableID"])
+
+	userInfo["_id"] = str(userInfo["_id"])
+	userInfo["personTableID"] = str(userInfo["personTableID"])
+	personInfo["_id"] = str(personInfo["_id"])
+
+	database.closeConnection()
+	return jsonify({"userInfo": userInfo, "personInfo": personInfo}), 200
