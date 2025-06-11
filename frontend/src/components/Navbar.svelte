@@ -1,5 +1,15 @@
 <script>
+    import { isAuthenticated } from '../authStore';
+    import { logoutUser } from '$lib/authentication/auth'; // your logout function
+    import { goto } from '$app/navigation';
+    import { get } from 'svelte/store';
 
+    function handleLogout()
+    {
+        logoutUser();
+        isAuthenticated.set(false);
+        goto('/');
+    }
 </script>
 
 <div class="navbar">
@@ -8,9 +18,14 @@
     </div>
 
     <div class="nav-right">
-        <a href="/preferences" class="heart-btn" aria-label="Preferences">❤️</a>
-        <a href="/login">Log in</a>
-        <a href="/signup">Sign up</a>
+        {#if $isAuthenticated}
+            <a href="/preferences" class="heart-btn" aria-label="Preferences">❤️</a>
+            <a href="#" on:click|preventDefault={handleLogout}>Log out</a>
+        {:else}
+        <a href="/auth/login">Log in</a>
+        <a href="/auth/signup">Sign up</a>
+        
+        {/if}
         <!-- <span>{username}</span> -->
 
     </div>
