@@ -8,7 +8,7 @@ def test_app_exists():
 def test_pets_endpoint_responds():
     """/api/pets endpoint responds"""
     client = app.test_client()
-    response = client.get('/api/pets')
+    response = client.get('/api/pets')    git pull origin apiRoutes
     assert response.status_code in [200, 500]  
 def test_pets_endpoint_returns_json():
     """pets endpoint returns JSON"""

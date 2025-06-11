@@ -40,6 +40,7 @@
 </style>
 
 <div class="container">
+    {#if pet}
     <PetCard
             name={pet.name}
             location={pet.location}
@@ -51,6 +52,9 @@
             about={pet.about}
             imageUrl={pet.imageUrl}
     />
+    {:else}
+    <p>Pet not found</p>
+    {/if}
 
     <div class="recommend-title">Recommended Pets for You</div>
 
