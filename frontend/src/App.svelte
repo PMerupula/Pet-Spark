@@ -1,5 +1,6 @@
 <!-- src/App.svelte -->
 <script lang="ts">
+<<<<<<< HEAD
     import { isAuthenticated, createdNewUser, userAccessToken} from './authStore.ts';
     import { logoutUser } from './lib/authentication/auth.ts';
     import { onMount } from 'svelte';
@@ -56,3 +57,28 @@
     <Dashboard />
   {/if}
 </main>
+=======
+    import Navbar from './components/Navbar.svelte';
+    import Banner from './components/Banner.svelte';
+    import PetDetails from './PetDetails.svelte';
+</script>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-wrapper {
+        padding-top: 4.5rem;
+    }
+</style>
+
+<Navbar />
+
+<Banner />
+
+<div class="main-wrapper">
+    <PetDetails />
+</div>
+>>>>>>> Frontend-Svelte
