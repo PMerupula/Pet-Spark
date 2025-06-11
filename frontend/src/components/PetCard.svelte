@@ -77,7 +77,7 @@
 
   <div class="right">
     <h2>{name}</h2>
-    <p><strong>Location:</strong> {qlocation}</p>
+    <p><strong>Location:</strong> {location}</p>
     <p><strong>Age:</strong> {age}</p>
     <p><strong>Gender:</strong> {gender}</p>
     <p><strong>Color:</strong> {color}</p>
