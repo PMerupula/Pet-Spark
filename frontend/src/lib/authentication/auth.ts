@@ -1,47 +1,109 @@
 // src/lib/authentication/auth.ts
-import { createAuth0Client, Auth0Client } from '@auth0/auth0-spa-js'
 
-let auth0: Auth0Client
+import { userAccessToken, isAuthenticated } from "../../authStore";
+import { createdNewUser } from "../../authStore";
 
-export async function initAuth() 
-{
-    // Called when the page loads--sets up the Auth0 client and checks the user's authentication status
-  auth0 = await createAuth0Client({
-    domain: import.meta.env.VITE_AUTH0_DOMAIN,
-    clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
-    authorizationParams: {
-      redirect_uri: window.location.origin, // where to redirect after login (goes back to the home page)
-      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      scope: 'openid profile email'
-    }
-  })
+const registerRoute = 'http://127.0.0.1:5000/api/authentication/register';
+const loginRoute = 'http://127.0.0.1:5000/api/authentication/login';
+const userIDRoute = 'https://dev-w53618ymk5dkjqz1.us.auth0.com/userinfo';
+const getUserIDRoute = 'http://127.0.0.1/api/authentication/getuserid';
+import { userID } from '../../authStore';
 
-  // Process redirect callback if user's coming back from Auth0 (i.e. they logged in either normally or after creating a user)
-  if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-    await auth0.handleRedirectCallback()
-    window.history.replaceState({}, document.title, '/') // Clears the query parameters from the URL
-  }
+export async function registerUser(email: string, password: string): Promise<{ success: boolean; message: string }> {
+	try {
+		const response = await fetch(registerRoute, 
+      {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, password })
+		});
 
-  // if the user is authenticated, print their user ID to the console
-  const isAuthenticated = await auth0.isAuthenticated()
-  if (isAuthenticated) 
-{
-    const user = await auth0.getUser()
-    console.log('Logged in as:', user?.sub)
-  }
+
+		const data = await response.json();
+		if (!response.ok) 
+    {
+      userAccessToken.set('');
+			return { success: false, message: data.error || 'Registration failed' };
+		}
+    isAuthenticated.set(true);
+    createdNewUser.set(true);
+    
+    const accessToken = data.access_token;
+    const thisUserID = data.user_id;
+
+    userAccessToken.set(accessToken);
+    userID.set(thisUserID);
+
+		return { success: true, message: `Registered with user ID: ${data.user_id}` };
+	} 
+  catch (err) {
+		console.error('Error registering user:', err);
+		return { success: false, message: 'Network or server error' };
+	}
 }
 
-// Redirects the user to the Auth0 login page 
-export async function loginUser() {
-  await auth0.loginWithRedirect()
+
+export async function loginUser(email: string, password: string): Promise<{ success: boolean; token?: string; message: string }> {
+	try {
+		const response = await fetch(loginRoute, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, password })
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return { success: false, message: data.error || 'Login failed' };
+		}
+    isAuthenticated.set(true);
+    
+    const accessToken = data.access_token;
+    const thisUserID = data.user_id;
+
+    userAccessToken.set(accessToken);
+    userID.set(thisUserID);
+
+    console.log('Login successful, access token:', accessToken);
+		return { success: true, token: accessToken, message: 'Login successful' };
+	} catch (err) {
+		console.error('Error logging in:', err);
+		return { success: false, message: 'Network or server error' };
+	}
 }
 
+export function logoutUser() 
+{
+  isAuthenticated.set(false);
+  userAccessToken.set('');
+  createdNewUser.set(false);
+  userID.set(null);
+}
 
-// Logs the user out and redirects them to the home page
-export async function logoutUser() {
-  auth0.logout({
-    logoutParams: {
-      returnTo: window.location.origin
+export async function getUserID(token: string): Promise<{ success: boolean; userId?: string}> 
+{
+  try {
+    const response = await fetch(getUserIDRoute, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Failed to get user ID:", error);
+      return { success: false };
     }
-  })
+
+    const data = await response.json();
+    return { success: true, userId: data.user_id };
+  } catch (err) {
+    console.error("Error calling /getuserid:", err);
+    return { success: false };
+  }
 }
