@@ -10,7 +10,7 @@
   let gender = "";
   let age = "";
   let breed = "";
-  let location = "95616";
+  let location = "Davis, CA"; 
   let limit = 50; 
 
   const dogBreeds = ["Labrador Retriever", "German Shepherd", "Golden Retriever", "Bulldog", "Poodle"];
@@ -83,7 +83,7 @@
     gender = "";
     age = "";
     breed = "";
-    location = "95816";
+    location = "Davis, CA"; 
     limit = 50;
     fetchPets();
   }
@@ -131,12 +131,11 @@
 
       <div class="filters-grid">
         <div class="filter-item">
-          <label>Location (ZIP Code)</label>
+          <label>Location (City, State)</label>
           <input 
             type="text" 
             bind:value={location} 
-            placeholder="Enter ZIP code"
-            maxlength="5"
+            placeholder="e.g., Davis, CA or San Francisco, CA"
           />
         </div>
 
