@@ -19,7 +19,6 @@
 
     <div class="nav-right">
         {#if $isAuthenticated}
-            <a href="/preferences" class="preferences-icon" aria-label="Preferences">♥️</a>
             <a href="#" on:click|preventDefault={handleLogout}>Log out</a>
         {:else}
         <a href="/auth/login">Log in</a>
