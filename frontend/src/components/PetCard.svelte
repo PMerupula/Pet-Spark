@@ -73,7 +73,6 @@
 <div class="container">
   <div class="left">
     <img src={imageUrl} alt="Pet image" class="pet-img" />
-    <button class="like-btn">❤️</button>
   </div>
 
   <div class="right">

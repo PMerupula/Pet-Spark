@@ -15,6 +15,7 @@ class Database:
 		self.__establish()
 
 	def __establish(self):
+		print("uri: ", self.__uri)
 		print("Establishing reference to mongoDB databse...")
 		try:
 			self.__database = self.__client.pet_spark
@@ -41,7 +42,7 @@ class Database:
 	# 		breed:  (string) should match breeds found in Pet Finders API: Get Animal Breeds
 	# 		size:  (string) small, medium, large, or xlarge
 	# 		gender:  (string) male, female, or unknown/Not Applicable
-	# 		age:  (int)
+	# 		age:  (string)
 	# 		color:  (string) should match colors found in Pet Finders API: Get Animal Types)
 	# 		coat:  (string) short, medium, long, wire, hairless, or curly
 	# 		name:  (string)
@@ -91,7 +92,7 @@ class Database:
 	# 		breed:  (string) should match breeds found in Pet Finders API: Get Animal Breeds
 	# 		size:  (string) small, medium, large, or xlarge
 	# 		gender:  (string) male, female, or unknown/Not Applicable
-	# 		age:  (int)
+	# 		age:  (string)
 	# 		color:  (string) should match colors found in Pet Finders API: Get Animal Types)
 	# 		coat:  (string) short, medium, long, wire, hairless, or curly
 	# 		name:  (string)
@@ -152,11 +153,17 @@ class Database:
 
 		print("Successfully removed person from user's associated persons.")
 
-	def getUserInformation(self, userID:str):
+	def getUserInformation(self, userID:str=None, authID:str=None):
 		print("Getting user information...")
 		
 		collection = self.__database.users
-		result = collection.find_one({"_id": ObjectId(userID)})
+		result = None
+		
+		if(userID != None):
+			result = collection.find_one({"_id": ObjectId(userID)})
+		
+		elif(authID != None):
+			result = collection.find_one({"authID": authID})
 
 		print("Successfully got user information.")
 		return result
@@ -170,16 +177,19 @@ class Database:
 		print("Successfully got person information.")
 		return result
 	
-	def updateUserInformation(self, userID:str, authID:str=None, location:str=None, livingSituation:str=None, livingSituationNotes:str=None, currentAnimals:list=None):
+	def updateUserInformation(self, userID:str=None, authID:str=None, location:str=None, livingSituation:str=None, livingSituationNotes:str=None, currentAnimals:list=None):
 		print("Updating user information...")
 
 		collection = self.__database.users
+		identifier = None
+		if(userID != None): identifier = {"_id": ObjectId(userID)}
+		elif(authID != None): identifier = {"authID": authID}
 
-		if(authID != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"authID": authID}})
-		if(location != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"location": location}})
-		if(livingSituation != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"livingSituation": livingSituation}})
-		if(livingSituationNotes != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"livingSituationNotes": livingSituationNotes}})
-		if(currentAnimals != None): collection.update_one({"_id": ObjectId(userID)}, {"$set": {"currentAnimals": currentAnimals}})
+		if(authID != None): collection.update_one(identifier, {"$set": {"authID": authID}})
+		if(location != None): collection.update_one(identifier, {"$set": {"location": location}})
+		if(livingSituation != None): collection.update_one(identifier, {"$set": {"livingSituation": livingSituation}})
+		if(livingSituationNotes != None): collection.update_one(identifier, {"$set": {"livingSituationNotes": livingSituationNotes}})
+		if(currentAnimals != None): collection.update_one(identifier, {"$set": {"currentAnimals": currentAnimals}})
 
 		print("Successfully updated user information.")
 	
