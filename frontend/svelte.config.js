@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
@@ -16,3 +17,14 @@ const config = {
 };
 
 export default config;
+=======
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from '@sveltejs/adapter-auto';
+
+export default {
+  preprocess: vitePreprocess(),
+  kit: {
+    adapter: adapter()
+  }
+};
+>>>>>>> Stashed changes
