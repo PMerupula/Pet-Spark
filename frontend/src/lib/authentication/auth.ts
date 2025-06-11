@@ -9,6 +9,8 @@ const userIDRoute = 'https://dev-w53618ymk5dkjqz1.us.auth0.com/userinfo';
 const getUserIDRoute = 'http://127.0.0.1/api/authentication/getuserid';
 import { userID } from '../../authStore';
 
+const mongoRoute = 'http://127.0.0.1:5000/api/mongo/createUser';
+
 export async function registerUser(email: string, password: string): Promise<{ success: boolean; message: string }> {
 	try {
 		const response = await fetch(registerRoute, 
@@ -69,6 +71,20 @@ export async function loginUser(email: string, password: string): Promise<{ succ
     userID.set(thisUserID);
 
     console.log('Login successful, access token:', accessToken);
+
+    
+    console.log("mongo");
+    const mongoResponse = await fetch(mongoRoute, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ thisUserID })
+		});
+    
+    const mongoData = await mongoResponse.json();
+    // console.log("mongoData", mongoData);
+
 		return { success: true, token: accessToken, message: 'Login successful' };
 	} catch (err) {
 		console.error('Error logging in:', err);

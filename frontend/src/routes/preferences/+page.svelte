@@ -1,4 +1,6 @@
 <script>
+  import { updateUserInDB } from '$lib/mongo/mongo';
+
   let type = "";
   let breed = "";
   let age = "";
@@ -31,15 +33,25 @@
     rabbit: rabbitBreeds
   };
 
-  function handleSubmit() {
-    alert(`Preferences saved:
-      Location: ${location}
-      Type: ${type}
-      Breed: ${breed}
-      Age: ${age}
-      Gender: ${gender}
-      Size: ${size}`);
+  async function handleSubmit() {
+    // alert(`Preferences saved:
+    //   Location: ${location}
+    //   Type: ${type}
+    //   Breed: ${breed}
+    //   Age: ${age}
+    //   Gender: ${gender}
+    //   Size: ${size}`);
     // Later, send { location, type, breed, age, gender, size } to your backend/API
+
+    let errorMessage = "";
+
+    const result = await updateUserInDB(location, type, breed, age, gender, size);
+    if (!result.success){
+      errorMessage = result.message;
+      alert(errorMessage);
+    }
+
+
   }
 </script>
 
