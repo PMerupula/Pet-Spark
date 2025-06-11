@@ -145,7 +145,7 @@
       
       console.log('Filtered pets API Response:', data);
       
-      filteredPets = data.animals?.map((animal, i) => ({
+      let filteredPets = data.animals?.map((animal, i) => ({
         id: `filtered_${i}`,
         name: animal.name,
         image: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || '/assets/placeholder.png',

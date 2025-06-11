@@ -27,7 +27,7 @@
     </div>
   </div>
 {:else}
-  <p>No more cats to show!</p>
+  <h1>No more cats to show!</h1>
 {/if}
 
 <style>
@@ -58,5 +58,9 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
+  }
+
+  h1{
+    text-align: center;
   }
 </style>
