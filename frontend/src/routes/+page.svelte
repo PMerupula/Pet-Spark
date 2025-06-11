@@ -39,7 +39,7 @@
   <section class="hero">
     <h1>Ready to adopt a pet?</h1>
     <p>Let's get started. Search adoptable pets from shelters, rescues, and individuals.</p>
-    <a href="/preferences" class="btn">Find Your Pet</a>
+    <a href="/pets" class="btn">Find Your Pet</a>
   </section>
 
   <!-- Carousel -->
