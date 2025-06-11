@@ -1,10 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import SwipeCard from '../components/SwipeCard.svelte';
-  import PetGrid from '../components/PetGrid.svelte';
+  import PetCard from '../components/PetCard.svelte'; 
+  
 
-  // Default stock photos
   let defaultPets = [
     { id: 1, name: "Ginger", image: "/assets/u126.png" },
     { id: 2, name: "Coco", image: "/assets/1224212546.png" },
@@ -13,14 +11,12 @@
     { id: 5, name: "Max", image: "/assets/1226328232.png" }
   ];
 
-  // This will hold either default pets or filtered real pets
   let pets = [...defaultPets];
-  let filteredPets = [];
   let recommendedPets = [];
   let loading = false;
   let error = null;
+  let recommendedLoading = true;
 
-  // Add modal state for pet details
   let showModal = false;
   let selectedPet = null;
 
@@ -36,6 +32,8 @@
   let gender = "";
   let age = "";
   let breed = "";
+  let location = "Davis, CA"; // Davis for default, to show how it's formatted
+  let lastLocation = ""; 
 
   const dogBreeds = ["Labrador Retriever", "German Shepherd", "Golden Retriever", "Bulldog", "Poodle"];
   const catBreeds = ["Domestic Short Hair", "Domestic Long Hair", "Siamese", "Persian", "Maine Coon"];
@@ -82,7 +80,7 @@
   }
 
   async function applyFilter() {
-    console.log('Applying filters:', { type, gender, age, breed });
+    console.log('Applying filters:', { type, gender, age, breed, location });
     
     if (type.length === 0 && !gender && !age && !breed) {
       pets = [...defaultPets];
@@ -108,8 +106,10 @@
       if (breed) {
         params.append('breed', breed);
       }
+      if (location) {
+        params.append('location', location);
+      }
       
-      params.append('location', '95616');
       params.append('limit', '10');
       params.append('sort', 'random');
       
@@ -152,38 +152,56 @@
     gender = "";
     age = "";
     breed = "";
+    location = "Davis, CA";
     pets = [...defaultPets];
     index = 0;
     error = null;
   }
 
-  onMount(async () => {
+  // Fetches the recommended pets based on current location
+  async function fetchRecommendedPets() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/pets?location=95616&sort=random');
+      recommendedLoading = true;
+      const response = await fetch(`http://127.0.0.1:5000/api/pets?location=${encodeURIComponent(location)}&sort=random&limit=8`);
       const data = await response.json();
       
       console.log('Home page recommended pets API Response:', data);
       
-      recommendedPets = data.animals?.map(animal => ({
-        name: animal.name,
-        location: `${animal.contact.address.city}, ${animal.contact.address.state}`,
-        age: animal.age,
-        gender: animal.gender,
-        color: animal.colors?.primary || 'Unknown',
-        houseTrained: animal.attributes?.house_trained ? 'Yes' : 'No',
-        health: animal.attributes?.spayed_neutered ? 'Spayed/Neutered' : 'Not specified',
-        about: animal.description || 'No description available',
-        imageUrl: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || ''
-      })) || [];
-      
-      recommendedPets = recommendedPets.slice(0, 8);
-      
-      console.log('Processed recommended pets for home:', recommendedPets);
+      if (data.animals && data.animals.length > 0) {
+        recommendedPets = data.animals.map(animal => ({
+          name: animal.name,
+          location: `${animal.contact.address.city}, ${animal.contact.address.state}`,
+          age: animal.age,
+          gender: animal.gender,
+          color: animal.colors?.primary || 'Unknown',
+          houseTrained: animal.attributes?.house_trained ? 'Yes' : 'No',
+          health: animal.attributes?.spayed_neutered ? 'Spayed/Neutered' : 'Not specified',
+          about: animal.description || 'No description available',
+          imageUrl: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || ''
+        }));
+        
+        console.log('Processed recommended pets for home:', recommendedPets);
+      } else {
+        recommendedPets = [];
+      }
       
     } catch (err) {
       console.error('Error fetching recommended pets:', err);
+      recommendedPets = [];
+    } finally {
+      recommendedLoading = false;
     }
+  }
+
+  onMount(() => {
+    lastLocation = location; 
+    fetchRecommendedPets();
   });
+
+  $: if (location && location !== lastLocation) {
+    lastLocation = location;
+    fetchRecommendedPets();
+  }
 </script>
 
 <main>
@@ -249,6 +267,15 @@
 
     <div class="filters-grid">
       <div class="filter-item">
+        <label>Location (City, State)</label>
+        <input 
+          type="text" 
+          bind:value={location} 
+          placeholder="e.g., Davis, CA or San Francisco, CA"
+        />
+      </div>
+
+      <div class="filter-item">
         <label>Gender</label>
         <select bind:value={gender}>
           <option value="">All genders</option>
@@ -299,15 +326,30 @@
 
   <section class="recommended">
     <h2>Recommended Pets for You</h2>
-    {#if recommendedPets.length > 0}
-      <PetGrid pets={recommendedPets} />
+    {#if recommendedLoading}
+      <p style="text-align: center; color: #666;">🐾 Loading recommended pets...</p>
+    {:else if recommendedPets.length > 0}
+      <div class="pets-container">
+        {#each recommendedPets as pet}
+          <PetCard 
+            name={pet.name}
+            location={pet.location}
+            age={pet.age}
+            gender={pet.gender}
+            color={pet.color}
+            houseTrained={pet.houseTrained}
+            health={pet.health}
+            about={pet.about}
+            imageUrl={pet.imageUrl}
+          />
+        {/each}
+      </div>
     {:else}
-      <p style="text-align: center; color: #666;">Loading recommended pets...</p>
+      <p style="text-align: center; color: #666;">No pets found in this location. Try changing your location filter.</p>
     {/if}
   </section>
 </main>
 
-<!-- Pet Details Modal -->
 {#if showModal && selectedPet}
   <div class="modal-overlay" on:click={closeModal}>
     <div class="modal-content" on:click|stopPropagation>
@@ -547,15 +589,10 @@
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  .type-selection label {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    cursor: pointer;
-  }
+ 
   .filters-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     margin-bottom: 1rem;
   }
@@ -564,11 +601,13 @@
     margin-bottom: 0.25rem;
     font-weight: bold;
   }
-  .filter-item select {
+  .filter-item select,
+  .filter-item input {
     width: 100%;
     padding: 0.5rem;
     border-radius: 6px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
   }
 
   .filter-actions {
@@ -813,5 +852,19 @@
     .info-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  .pets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .looking-text {
+    font-weight: bold;
+    color: #333;
+    margin-right: 1rem;
   }
 </style>
