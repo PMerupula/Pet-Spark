@@ -46,7 +46,7 @@
       const response = await fetch(`http://127.0.0.1:5000/api/pets/${pet.petId}`);
       const data = await response.json();
       
-      console.log('Pet details:', data);
+      // console.log('Pet details:', data);
       
       if (data.animal) {
         selectedPet = {
@@ -106,7 +106,7 @@
   }
 
   async function applyFilter() {
-    console.log('Applying filters:', { type, gender, age, breed, location });
+    // console.log('Applying filters:', { type, gender, age, breed, location });
     
     if (type.length === 0 && !gender && !age && !breed) {
       pets = [...defaultPets];
@@ -159,7 +159,7 @@
       if (processedPets.length > 0) {
         pets = processedPets;
         index = 0; 
-        console.log('Updated carousel with filtered pets:', pets);
+        // console.log('Updated carousel with filtered pets:', pets);
       } else {
         error = "No pets found matching your criteria. Try different filters!";
         pets = [...defaultPets]; 
@@ -192,7 +192,7 @@
       const response = await fetch(`http://127.0.0.1:5000/api/pets?sort=random&limit=20`);
       const data = await response.json();
       
-      console.log('Random pets for recommendation:', data);
+      // console.log('Random pets for recommendation:', data);
       
       if (data.animals && data.animals.length > 0) {
         recommendedPets = data.animals.map(animal => ({

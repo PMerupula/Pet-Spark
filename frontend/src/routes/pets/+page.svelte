@@ -56,13 +56,13 @@
       params.append('limit', limit);
       params.append('sort', 'random');
 
-      console.log("params: ", params.toString());
+      // console.log("params: ", params.toString());
       
       const response = await fetch(`http://127.0.0.1:5000/api/pets?${params.toString()}`);
       const data = await response.json();
       
-      console.log('API Response:', data);
-      console.log('Number of animals:', data.animals?.length);
+      // console.log('API Response:', data);
+      // console.log('Number of animals:', data.animals?.length);
       
       pets = data.animals?.map(animal => ({
         name: animal.name,
@@ -76,7 +76,7 @@
         imageUrl: animal.photos?.[0]?.large || animal.photos?.[0]?.medium || animal.photos?.[0]?.small || ''
       })) || [];
       
-      console.log('Processed pets:', pets);
+      // console.log('Processed pets:', pets);
       
     } catch (err) {
       error = err.message;
@@ -87,7 +87,7 @@
   }
 
   function applyFilter() {
-    console.log('Applying filters:', { petTypeDog, petTypeCat, petTypeRabbit, petGender, petAge, petBreed, location, limit });
+    // console.log('Applying filters:', { petTypeDog, petTypeCat, petTypeRabbit, petGender, petAge, petBreed, location, limit });
     fetchPets();
   }
 
@@ -110,7 +110,7 @@
   async function loadUserPreferences() {
     const responseToUserLoggedIn = await verifyUserLoggedIn();
     if(!responseToUserLoggedIn.success){
-      console.log("User not logged in (svelte)");
+      // console.log("User not logged in (svelte)");
       fetchPets();
       return;
     }
@@ -134,7 +134,7 @@
     if(preferredAnimalData["age"] !== null && preferredAnimalData["age"] !== "any") petAge = preferredAnimalData["age"];
     if(preferredAnimalData["breed"] !== null && preferredAnimalData["breed"] !== "any") petBreed = preferredAnimalData["breed"];
 
-    console.log("type: ", petTypeDog, petTypeCat, petTypeRabbit);
+    // console.log("type: ", petTypeDog, petTypeCat, petTypeRabbit);
     fetchPets();
   }
 </script>
