@@ -7,5 +7,5 @@ env/
 
 # Secrets
 *.env
+.env
 
-routes/
