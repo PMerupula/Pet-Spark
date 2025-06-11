@@ -27,12 +27,28 @@ def get_pets():
     token = get_petAPI()
     headers = {'Authorization': f'Bearer {token}'}
 
+    # Build params dict with all possible filters
     params = {
-        "type": request.args.get("type"),
-        "location": request.args.get("location"),
         "page": request.args.get("page", 1),
+        "limit": request.args.get("limit", 50),  # max is 100
         "sort": request.args.get("sort", "random"),
     }
+    
+    # Adds filters only if they have values
+    if request.args.get("type"):
+        params["type"] = request.args.get("type")
+        
+    if request.args.get("location"):
+        params["location"] = request.args.get("location")
+        
+    if request.args.get("gender"):
+        params["gender"] = request.args.get("gender")
+        
+    if request.args.get("age"):
+        params["age"] = request.args.get("age")
+        
+    if request.args.get("breed"):
+        params["breed"] = request.args.get("breed")
 
     # photos are returned here, it returns a small, medium, large and full photo in the response
     res = requests.get(
@@ -40,6 +56,7 @@ def get_pets():
         headers=headers,
         params=params
     )
+    
     return jsonify(res.json())
 
 @pets_blueprint.route('/pets/<int:pet_id>', methods=['GET'])
